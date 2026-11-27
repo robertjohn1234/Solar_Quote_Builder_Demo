@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer } from 'react
 import { seedLibrary } from '../data/library.js';
 import { defaultSettings, blankQuote } from '../lib/defaults.js';
 import { uid, todayISO } from '../lib/format.js';
+import { config, isDemo } from '../config.js';
 
 const STORAGE_KEY = 'liwanag-quote-v1';
 const Ctx = createContext(null);
@@ -110,7 +111,7 @@ function reducer(state, a) {
 }
 
 export function StoreProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, undefined, () => load() || sampleData());
+  const [state, dispatch] = useReducer(reducer, undefined, () => load() || (config.startWithSampleData ? sampleData() : emptyData()));
 
   useEffect(() => {
     try {
@@ -136,7 +137,20 @@ export function StoreProvider({ children }) {
     []
   );
 
-  const value = useMemo(() => ({ state, settingsWithToday: { ...state.settings, today: todayISO() }, ...actions }), [state, actions]);
+  // Demo: the company name on screen and on printouts is always the demo name
+  const shown = useMemo(
+    () => (isDemo ? { ...state, settings: { ...state.settings, company: { ...state.settings.company, name: config.demoCompanyName } } } : state),
+    [state]
+  );
+  const value = useMemo(
+    () => ({
+      state: shown,
+      settingsWithToday: { ...shown.settings, today: todayISO() },
+      canAddQuote: !isDemo || shown.quotes.length < config.demoMaxQuotes,
+      ...actions,
+    }),
+    [shown, actions]
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

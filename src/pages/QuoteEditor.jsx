@@ -4,6 +4,8 @@ import { buildQuote, findItem, itemName, suggestPanels } from '../lib/engine.js'
 import { CATEGORIES, ROLES } from '../data/library.js';
 import { peso, pesoShort, num, pct, uid, years, fmtDate, addDays } from '../lib/format.js';
 import { Icon, Badge, Field, toast } from '../components/ui.jsx';
+import { DemoInfo } from '../components/Demo.jsx';
+import { config } from '../config.js';
 
 const SYSTEMS = [
   { id: 'grid', label: 'Grid-tie', icon: 'bolt' },
@@ -109,7 +111,8 @@ function AddLine({ lib, onAdd }) {
 }
 
 export default function QuoteEditor({ quote: q, go }) {
-  const { state, settingsWithToday, saveQuote } = useStore();
+  const { state, settingsWithToday, saveQuote, canAddQuote } = useStore();
+  const [limit, setLimit] = useState(false);
   const lib = state.library;
   const settings = state.settings;
   const r = useMemo(() => buildQuote(q, lib, settingsWithToday), [q, lib, settingsWithToday]);
@@ -145,6 +148,7 @@ export default function QuoteEditor({ quote: q, go }) {
   const setCost = (id, patch) => update({ costs: q.costs.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
 
   const duplicate = () => {
+    if (!canAddQuote) return setLimit(true);
     const copy = { ...structuredClone(q), id: uid(), number: newQuote(state).number, status: 'draft', date: new Date().toISOString().slice(0, 10) };
     saveQuote(copy);
     toast(`Copied as ${copy.number}`);
@@ -610,6 +614,7 @@ export default function QuoteEditor({ quote: q, go }) {
           </div>
         </aside>
       </div>
+      {limit && <DemoInfo reason={`The demo keeps up to ${config.demoMaxQuotes} quotes. Delete one to duplicate this quote.`} onClose={() => setLimit(false)} />}
     </div>
   );
 }

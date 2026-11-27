@@ -4,6 +4,7 @@ import { buildQuote } from '../lib/engine.js';
 import { CATEGORIES } from '../data/library.js';
 import { peso, pesoShort, num, pct, fmtDate, addDays, years } from '../lib/format.js';
 import { Icon } from '../components/ui.jsx';
+import { DemoWatermark } from '../components/Demo.jsx';
 
 const SYS = { grid: 'Grid-tie solar PV system', hybrid: 'Hybrid solar PV system with battery storage', offgrid: 'Off-grid solar PV system with battery storage' };
 
@@ -379,7 +380,10 @@ export default function PrintView({ id, view, go }) {
           <Icon name="alert" size={16} /> This quote still has {r.errors} design problem{r.errors > 1 ? 's' : ''}. Fix them before sending.
         </p>
       )}
-      <article className="doc">{internal ? <CostingSheet q={q} r={r} s={state.settings} /> : <CustomerQuote q={q} r={r} s={state.settings} />}</article>
+      <article className="doc">
+        <DemoWatermark />
+        {internal ? <CostingSheet q={q} r={r} s={state.settings} /> : <CustomerQuote q={q} r={r} s={state.settings} />}
+      </article>
     </div>
   );
 }

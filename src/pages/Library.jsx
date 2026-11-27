@@ -5,6 +5,8 @@ import { itemName, daysSince } from '../lib/engine.js';
 import { parseCSV, toCSV, guessMapping, guessCategory, toNumber, IMPORT_FIELDS } from '../lib/csv.js';
 import { peso, fmtDate, uid, todayISO, download } from '../lib/format.js';
 import { Icon, Modal, Field, Empty, useConfirm, toast } from '../components/ui.jsx';
+import { DemoInfo } from '../components/Demo.jsx';
+import { isDemo } from '../config.js';
 
 // Spec fields per category (used by the design checks)
 const SPEC_FIELDS = {
@@ -311,6 +313,7 @@ export default function Library() {
   const [editing, setEditing] = useState(null);
   const [importing, setImporting] = useState(false);
   const [bulk, setBulk] = useState(false);
+  const [demoBlock, setDemoBlock] = useState('');
   const [bulkPct, setBulkPct] = useState(5);
   const [ask, dialog] = useConfirm();
   const staleDays = state.settings.staleDays;
@@ -345,7 +348,7 @@ export default function Library() {
           <button className="btn btn--ghost" onClick={exportCsv}>
             <Icon name="download" size={18} /> <span className="hide-sm">Export</span>
           </button>
-          <button className="btn btn--ghost" onClick={() => setImporting(true)}>
+          <button className="btn btn--ghost" onClick={() => (isDemo ? setDemoBlock('Importing supplier price lists is part of the full version.') : setImporting(true))}>
             <Icon name="upload" size={18} /> Import price list
           </button>
           <button className="btn btn--primary" onClick={() => setEditing(blankItem(cat === 'all' ? 'panel' : cat))}>
@@ -490,6 +493,7 @@ export default function Library() {
           }}
         />
       )}
+      {demoBlock && <DemoInfo reason={demoBlock} onClose={() => setDemoBlock('')} />}
       {dialog}
     </div>
   );

@@ -5,6 +5,8 @@ import { parseInquiry } from '../lib/inquiry.js';
 import { suggestPanels, findItem } from '../lib/engine.js';
 import { pesoShort, num, pct, fmtDate, uid } from '../lib/format.js';
 import { Icon, Badge, Empty, Modal, useConfirm, toast } from '../components/ui.jsx';
+import { DemoInfo } from '../components/Demo.jsx';
+import { config } from '../config.js';
 
 const STATUSES = ['draft', 'sent', 'won', 'lost'];
 const SYS = { grid: 'Grid-tie', hybrid: 'Hybrid', offgrid: 'Off-grid' };
@@ -49,7 +51,9 @@ function PasteInquiry({ onClose, onCreate }) {
 }
 
 export default function Quotes({ go }) {
-  const { state, settingsWithToday, saveQuote, removeQuote } = useStore();
+  const { state, settingsWithToday, saveQuote, removeQuote, canAddQuote } = useStore();
+  const [limit, setLimit] = useState(false);
+  const guard = (fn) => (...args) => (canAddQuote ? fn(...args) : setLimit(true));
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [paste, setPaste] = useState(false);
@@ -73,13 +77,13 @@ export default function Quotes({ go }) {
       (!search || `${q.number} ${q.customer.name} ${q.customer.address}`.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const create = (patch = {}) => {
+  const create = guard((patch = {}) => {
     const q = { ...newQuote(state), ...patch };
     saveQuote(q);
     go(`quote/${q.id}`);
-  };
+  });
 
-  const fromInquiry = (p) => {
+  const fromInquiry = guard((p) => {
     const q = newQuote(state);
     q.customer = { ...q.customer, ...Object.fromEntries(Object.entries(p.customer).filter(([, v]) => v)) };
     q.sizing = { ...q.sizing, ...Object.fromEntries(Object.entries(p.sizing).filter(([, v]) => v != null)) };
@@ -92,13 +96,13 @@ export default function Quotes({ go }) {
     saveQuote(q);
     toast('Quote created from inquiry');
     go(`quote/${q.id}`);
-  };
+  });
 
-  const duplicate = (q) => {
+  const duplicate = guard((q) => {
     const copy = { ...structuredClone(q), id: uid(), number: newQuote(state).number, status: 'draft', date: new Date().toISOString().slice(0, 10) };
     saveQuote(copy);
     toast(`Copied as ${copy.number}`);
-  };
+  });
 
   return (
     <div className="page">
@@ -218,6 +222,7 @@ export default function Quotes({ go }) {
         </div>
       )}
       {paste && <PasteInquiry onClose={() => setPaste(false)} onCreate={fromInquiry} />}
+      {limit && <DemoInfo reason={`The demo keeps up to ${config.demoMaxQuotes} quotes. Delete one to create another.`} onClose={() => setLimit(false)} />}
       {dialog}
     </div>
   );

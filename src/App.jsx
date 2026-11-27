@@ -6,6 +6,8 @@ import QuoteEditor from './pages/QuoteEditor.jsx';
 import Library from './pages/Library.jsx';
 import Settings from './pages/Settings.jsx';
 import PrintView from './pages/PrintView.jsx';
+import { DemoBanner } from './components/Demo.jsx';
+import { isDemo } from './config.js';
 
 const NAV = [
   { id: 'quotes', label: 'Quotes', icon: 'quote' },
@@ -43,7 +45,7 @@ export default function App() {
   const quote = route.page === 'quote' ? state.quotes.find((q) => q.id === route.id) : null;
 
   return (
-    <div className="app">
+    <div className={`app${isDemo ? ' is-demo' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
           <span className="brand__mark">
@@ -65,6 +67,7 @@ export default function App() {
       </aside>
 
       <main className="main">
+        <DemoBanner />
         {route.page === 'quotes' && <Quotes go={go} />}
         {route.page === 'quote' && (quote ? <QuoteEditor key={quote.id} quote={quote} go={go} /> : <Missing go={go} />)}
         {route.page === 'library' && <Library />}

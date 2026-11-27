@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useStore } from '../store/store.jsx';
 import { todayISO, download, fmtDate, uid } from '../lib/format.js';
 import { Icon, Field, useConfirm, toast } from '../components/ui.jsx';
+import { isDemo } from '../config.js';
 
 const COST_MODES = [
   { id: 'fixed', label: 'Fixed amount' },
@@ -73,8 +74,8 @@ export default function Settings() {
           </h2>
         </div>
         <div className="grid-3">
-          <Field label="Company name">
-            <input className="input" value={s.company.name} onChange={(e) => setCo('name', e.target.value)} />
+          <Field label="Company name" hint={isDemo ? 'Locked in the demo' : undefined}>
+            <input className="input" value={s.company.name} onChange={(e) => setCo('name', e.target.value)} disabled={isDemo} />
           </Field>
           <Field label="Tagline">
             <input className="input" value={s.company.tagline} onChange={(e) => setCo('tagline', e.target.value)} />
@@ -232,11 +233,12 @@ export default function Settings() {
         <p className="small">
           Your quotes and materials are saved <b>only in this browser on this device</b>. Save a backup file regularly. Last backup: <b>{state.lastBackup ? fmtDate(state.lastBackup) : 'never'}</b>.
         </p>
+        {isDemo && <p className="notice notice--warn">Backup and restore are turned off in the demo.</p>}
         <div className="row-actions">
-          <button className="btn btn--primary" onClick={backup}>
+          <button className="btn btn--primary" onClick={backup} disabled={isDemo}>
             <Icon name="download" size={18} /> Save backup file
           </button>
-          <button className="btn btn--ghost" onClick={() => fileRef.current?.click()}>
+          <button className="btn btn--ghost" onClick={() => fileRef.current?.click()} disabled={isDemo}>
             <Icon name="upload" size={18} /> Restore from file
           </button>
           <input ref={fileRef} type="file" accept=".json" hidden onChange={(e) => restore(e.target.files[0])} />

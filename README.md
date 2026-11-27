@@ -42,3 +42,23 @@ Datasheet specs: Deye SG04LP1 and Growatt MIN TL-X datasheets; a 620 W TOPCon da
 ## Supplier price lists
 
 Ask the supplier for their dealer/installer list (Excel/PDF). For Excel: **File → Save As → CSV**. In the app: **Materials → Import price list** → match the columns (description, price, unit, brand…) → choose category or let the app detect it → import. Add the datasheet specs for panels, inverters and batteries so the design checks work.
+
+## Demo vs client copies (`src/config.js`)
+
+| | Public demo (`demoMode: true`) | Paying client (`demoMode: false`) |
+|---|---|---|
+| Quotations & costing sheets | **"DEMO — NOT A VALID QUOTATION"** watermark | Clean |
+| Company name | Locked to `demoCompanyName` | Client's own name (Settings) |
+| Quotes | Max `demoMaxQuotes` (3) | Unlimited |
+| Supplier CSV import, backup & restore | Off | On |
+| Banner | "Demo version" strip on every screen | None |
+
+### Delivering to a paying client (keep the full version protected)
+
+1. Keep this source code in a **private** GitHub repo. Only built sites go online.
+2. After the **down payment**, make the client's copy: in `src/config.js` set `demoMode: false` and `startWithSampleData: false`.
+3. Build and host it **under your account** on Render (a separate Static Site per client, e.g. `client-name-quotes.onrender.com`), or a private repo you create for them.
+4. Set up their company name, pricing and suppliers in Settings, save a backup, and send the link only to the client.
+5. Your public portfolio link always stays on the **demo** build.
+
+> A browser app can still be copied by a determined programmer — the demo limits, private repo and your written terms are the protection. Real enforcement (logins, subscription) comes with the online version.
